@@ -1,0 +1,57 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3333:3333
+    networks:
+      - app-network
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - localstack
+    restart: on-failure
+    command:
+      - /bin/sh
+      - -c
+      - |
+        npx prisma db push
+        node dist/server.js
+  db:
+    image: bitnami/postgresql
+    environment:
+      POSTGRES_USER: tramela
+      POSTGRES_PASSWORD: 6789
+      POSTGRES_DB: cemig
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U squall -d expenses-db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  localstack:
+    container_name: localstack-main
+    image: localstack/localstack
+    ports:
+      - "0.0.0.0:4566:4566"            # LocalStack Gateway
+    networks:
+      - app-network
+    environment:
+      - DEBUG=${DEBUG:-0}
+    volumes:
+    #https://docs.localstack.cloud/references/init-hooks/
+      - "./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+volumes:
+  db_data:
+networks:
+  app-network:
+
