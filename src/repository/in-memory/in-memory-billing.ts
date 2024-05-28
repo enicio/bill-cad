@@ -4,6 +4,18 @@ import { createBillingInput } from '../billing-repository'
 let billingData: ClientData[] = []
 
 export class InMemoryBillingRepository implements createBillingInput {
+  async getBillingByClientNumber(clientNumber: string): Promise<any | null> {
+    const billing = billingData.filter(
+      (billing) => billing.clientNumber === clientNumber,
+    )
+
+    if (!billing) {
+      return null
+    }
+
+    return billing
+  }
+
   async createBilling(clientData: ClientData, data: any): Promise<any> {
     const billing = {
       id: billingData.length + 1,
