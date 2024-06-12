@@ -10,8 +10,6 @@ export async function downloadFilesFromS3(
     Key: fileId,
   })
 
-  console.log('command´:', command.input.Key)
-
   const response = await s3Client.send(command)
   const arrayBuffer = await response.Body?.transformToByteArray()
 
